@@ -1,5 +1,7 @@
 use std::{array::IntoIter, iter::Peekable, slice::Chunks};
 
+mod booth_circuit;
+
 const BITS: usize = 8;
 
 type Byte = [bool; 8];
