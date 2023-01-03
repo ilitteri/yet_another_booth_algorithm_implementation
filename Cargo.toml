@@ -7,3 +7,5 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1"
+ark-r1cs-std = { version = "^0.3.0", default-features = false }
+simpleworks = { git = "https://github.com/lambdaclass/simpleworks" }
