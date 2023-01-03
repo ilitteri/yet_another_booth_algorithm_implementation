@@ -1,9 +1,6 @@
 use anyhow::{ensure, Result};
-use ark_r1cs_std::{
-    prelude::{AllocVar, Boolean},
-    R1CSVar, ToBitsGadget,
-};
-use simpleworks::gadgets::{traits::IsWitness, ConstraintF, UInt8Gadget};
+use ark_r1cs_std::{prelude::Boolean, R1CSVar, ToBitsGadget};
+use simpleworks::gadgets::{ConstraintF, UInt8Gadget};
 use std::{iter::Peekable, slice::Chunks, vec::IntoIter};
 
 const BITS: usize = 8;
@@ -57,7 +54,10 @@ fn add(augend: &UInt8Gadget, addend: &UInt8Gadget) -> Result<UInt8Gadget> {
         // sum[i] = (!carry & (augend_bit ^ addend_bit)) | (carry & !(augend_bit ^ addend_bit))
         //        = augend_bit ^ addend_bit ^ carry
         sum[i] = carry.xor(&augend_bit)?.xor(&addend_bit)?;
-        println!("{carry:?} XOR {augend_bit:?} XOR {addend_bit:?} = {:?}", sum[i]);
+        println!(
+            "{carry:?} XOR {augend_bit:?} XOR {addend_bit:?} = {:?}",
+            sum[i]
+        );
         // To simplify things, the variable carry acts for both the carry in and
         // the carry out.
         // The carry out is augend & addend when the carry in is 0, and it is
@@ -126,11 +126,19 @@ fn mul(multiplicand: &UInt8Gadget, multiplier: &UInt8Gadget) -> Result<UInt8Gadg
             }
             _ => todo!(),
         };
-        println!("{} + {} = {}", product.value()?, partial_product.value()?, add(&product, &partial_product)?.value()?);
+        println!(
+            "{} + {} = {}",
+            product.value()?,
+            partial_product.value()?,
+            add(&product, &partial_product)?.value()?
+        );
         product = add(&product, &partial_product)?;
         println!("{}", product.value()?);
     }
-    println!("3 * 3 = 253 + 12 = 00001001 = {}", add(&UInt8Gadget::constant(253), &UInt8Gadget::constant(12))?.value()?);
+    println!(
+        "3 * 3 = 253 + 12 = 00001001 = {}",
+        add(&UInt8Gadget::constant(253), &UInt8Gadget::constant(12))?.value()?
+    );
     Ok(product)
 }
 
@@ -188,7 +196,7 @@ fn encode_next_bit(
     bits: &mut Peekable<IntoIter<Boolean<ConstraintF>>>,
 ) -> Vec<String> {
     match bits.next() {
-        Some(Boolean::Is(_)) | Some(Boolean::Constant(true)) => {
+        Some(Boolean::Is(_) | Boolean::Constant(true)) => {
             // It's another 1 in the 1's sequence.
             if peek_bit_is_one(bits) {
                 encoded_bits.push("0".to_owned());
@@ -199,7 +207,7 @@ fn encode_next_bit(
                 encode_next_bit(encoded_bits, bits)
             }
         }
-        Some(Boolean::Not(_)) | Some(Boolean::Constant(false)) => {
+        Some(Boolean::Not(_) | Boolean::Constant(false)) => {
             // It's the end of the 1's sequence.
             if peek_bit_is_one(bits) {
                 encoded_bits.push("+1".to_owned());
